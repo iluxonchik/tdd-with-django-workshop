@@ -1,5 +1,6 @@
 import unittest
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 class HomePageTest(unittest.TestCase):
     def setUp(self):
@@ -15,12 +16,17 @@ class HomePageTest(unittest.TestCase):
 
         # She notices the page title and header mention to-do lists
         self.assertIn('To-Do', self.browser.title)
-        self.fail('finish the test!')
+        header = self.browser.find_element_by_tag_name('h1')
+        self.assertIn('To-Do', header.text)
 
         # She is invited to enter a to-do item straight away
 
         # She types "Buy peacock feathers" into a text box (Edith's hobby
         # is tying fly-fishing lures)
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertEqual(inputbox.get_attribute('placeholder'), 'Enter a to-do item')
+        inputbox.send_keys('Buy peacock feathers')
+        inputbox.send_keys(Keys.ENTER)
 
         # When she hits enter, the page updates, and now the page lists
         # "1: Buy peacock feathers" as an item in a to-do list
@@ -37,6 +43,7 @@ class HomePageTest(unittest.TestCase):
         # She visits that URL - her to-do list is still there.
 
         # Satisfied, she goes back to sleep
+        self.fail('finish the test!')
         
 if __name__ == '__main__':
     unittest.main()

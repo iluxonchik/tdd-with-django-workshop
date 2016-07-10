@@ -1,6 +1,6 @@
 from django.test import TestCase
+from django.template.loader import render_to_string
 from django.http import HttpRequest
-
 from lists.views import home_page
 
 class HomePaheViewTest(TestCase):
@@ -10,4 +10,12 @@ class HomePaheViewTest(TestCase):
         response = home_page(request)  # just calling the view function directly
         self.assertTrue(response.content.decode('utf-8').startswith('<html>'))
         self.assertIn('<title>To-Do lists</title>', response.content.decode('utf-8'))
-        self.assertTrue(response.content.decode('utf-8').endswith('</html>'))
+        self.assertTrue(response.content.decode('utf-8').strip().endswith('</html>'))
+        
+        # In the code above we're testing constants, which we should not do, so let's fix this
+        # and test behaviour (expected content, and not constants).
+        # Note, we did not remove the tests above, we only do that after we make sure that the tests
+        # continue passing.
+        expected_content = render_to_string('home.html')
+        self.assertEqual(response.content.decode('utf-8'), expected_content)
+
