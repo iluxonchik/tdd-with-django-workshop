@@ -21,35 +21,6 @@ class HomePaheViewTest(TestCase):
         expected_content = render_to_string('home.html', request=request)  # request=request to make sure the same csrf token is generated
         self.assertEqual(response.content.decode('utf-8'), expected_content)
 
-    def test_home_page_displays_all_items(self):
-        Item.objects.create(text='item 1')
-        Item.objects.create(text='item 2')
-
-        request = HttpRequest()
-        response = home_page(request)
-
-        self.assertIn('item 1', response.content.decode('utf8'))
-        self.assertIn('item 2', response.content.decode('utf8'))
-
-class ItemModelTest(TestCase):
-
-    def test_saving_and_retrieving_items(self):
-        first_item = Item()
-        first_item.text = 'The 1st list item'
-        first_item.save()
-
-        second_item = Item()
-        second_item.text = 'The 2nd list item'
-        second_item.save()
-
-        saved_items = Item.objects.all()
-        self.assertEqual(saved_items.count(), 2)
-
-        first_saved_item = saved_items[0]
-        second_saved_item = saved_items[1]
-        self.assertEqual(first_saved_item.text, 'The 1st list item')
-        self.assertEqual(second_saved_item.text, 'The 2nd list item')
-
     def test_home_page_can_save_a_POST_request(self):
         request = HttpRequest()
         request.method = 'POST'
@@ -78,4 +49,29 @@ class ItemModelTest(TestCase):
        response = home_page(request)
 
        self.assertEqual(response.status_code, 302)
-       self.assertEqual(response['location'], '/')
+       self.assertEqual(response['location'], '/lists/the-only-list-in-the-world/')
+
+class ItemModelTest(TestCase):
+
+    def test_saving_and_retrieving_items(self):
+        first_item = Item()
+        first_item.text = 'The 1st list item'
+        first_item.save()
+
+        second_item = Item()
+        second_item.text = 'The 2nd list item'
+        second_item.save()
+
+        saved_items = Item.objects.all()
+        self.assertEqual(saved_items.count(), 2)
+
+        first_saved_item = saved_items[0]
+        second_saved_item = saved_items[1]
+        self.assertEqual(first_saved_item.text, 'The 1st list item')
+        self.assertEqual(second_saved_item.text, 'The 2nd list item')
+
+
+class ListViewTest(TestCase):
+    def test_uses_list_template(self):
+        response = self.client.get('/lists/the-only-list-in-the-world/')
+        self.assertTemplateUsed(response, 'list.html')
