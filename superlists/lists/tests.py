@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from lists.views import home_page
 from lists.models import Item
 
-class HomePaheViewTest(TestCase):
+class HomePageViewTest(TestCase):
 
     # NOTE on csrf: to make the unit test work with csrf tokens, we need to make sure that we're always using the same HttpRequest
     # object, since for a different HttpRequest object, a different value of csrf token will be generated, so the assertEqual() tests
@@ -21,35 +21,14 @@ class HomePaheViewTest(TestCase):
         expected_content = render_to_string('home.html', request=request)  # request=request to make sure the same csrf token is generated
         self.assertEqual(response.content.decode('utf-8'), expected_content)
 
-    def test_home_page_can_save_a_POST_request(self):
-        request = HttpRequest()
-        request.method = 'POST'
-        request.POST['item_text'] = 'A new list item'
+    ## self.assertIn('A new list item', response.content.decode('utf8'))
+    ## expected_html = render_to_string('home.html', {'new_item_text': 'A new list item'}, request=request)
+    ## self.assertEqual(response.content.decode('utf8'), expected_html)
 
-        response = home_page(request)
-
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertEqual(new_item.text, 'A new list item')
-
-        # self.assertIn('A new list item', response.content.decode('utf8'))
-        # expected_html = render_to_string('home.html', {'new_item_text': 'A new list item'}, request=request)
-        # self.assertEqual(response.content.decode('utf8'), expected_html)
-
-    def test_home_page_only_saves_items_when_necesary(self):
-        request = HttpRequest()
-        home_page(request)
-        self.assertEqual(Item.objects.count(), 0)
-
-    def test_home_page_redirects_after_POST(self):
-       request = HttpRequest()
-       request.method = 'POST' 
-       request.POST['item_text'] = 'A new list item'
-
-       response = home_page(request)
-
-       self.assertEqual(response.status_code, 302)
-       self.assertEqual(response['location'], '/lists/the-only-list-in-the-world/')
+    ## def test_home_page_only_saves_items_when_necesary(self):
+    ##     request = HttpRequest()
+    ##     home_page(request)
+    ##     self.assertEqual(Item.objects.count(), 0)
 
 class ItemModelTest(TestCase):
 
@@ -75,3 +54,16 @@ class ListViewTest(TestCase):
     def test_uses_list_template(self):
         response = self.client.get('/lists/the-only-list-in-the-world/')
         self.assertTemplateUsed(response, 'list.html')
+
+class NewListTest(TestCase):
+
+    def test_saving_a_POST_request(self):
+        self.client.post('/lists/new/', data={'item_text': 'A new list item'})
+
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new list item')
+
+    def test_redirects_after_POST(self):
+        response = self.client.post('/lists/new/', data={'item_text':'A new list item'}) 
+        self.assertRedirects(response, '/lists/the-only-list-in-the-world/')
