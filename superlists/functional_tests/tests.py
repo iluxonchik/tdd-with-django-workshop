@@ -79,7 +79,6 @@ class HomePageTest(LiveServerTestCase):
         self.assertIn('Buy milk', page_text)
 
         # Satisfied, both of them go back to sleep
-        self.fail('finish the test!')
 
     def check_for_row_in_list_table(self, row_text):
         table = self.browser.find_element_by_id('id_list_table')
